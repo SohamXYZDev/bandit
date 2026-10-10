@@ -46,6 +46,14 @@ from bandit.core import issue
 from bandit.core import test_properties as test
 
 
+SAFE_LOADERS = (
+    "BaseLoader",
+    "CBaseLoader",
+    "SafeLoader",
+    "CSafeLoader",
+)
+
+
 @test.test_id("B506")
 @test.checks("Call")
 def yaml_load(context):
@@ -60,10 +68,8 @@ def yaml_load(context):
         [
             "yaml" in qualname_list,
             func == "load",
-            not context.check_call_arg_value("Loader", "SafeLoader"),
-            not context.check_call_arg_value("Loader", "CSafeLoader"),
-            not context.get_call_arg_at_position(1) == "SafeLoader",
-            not context.get_call_arg_at_position(1) == "CSafeLoader",
+            not context.check_call_arg_value("Loader", list(SAFE_LOADERS)),
+            context.get_call_arg_at_position(1) not in SAFE_LOADERS,
         ]
     ):
         return bandit.Issue(
